@@ -348,9 +348,9 @@
 
       <!-- ===================== DETAIL ===================== -->
       <div v-else class="space-y-5">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
           <!-- Mention by Platform -->
-          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
+          <div ref="platformCardRef" class="bg-white rounded-xl shadow p-4 flex flex-col">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
             >
@@ -388,7 +388,7 @@
           </div>
 
           <!-- Mention by Media -->
-          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
+          <div class="bg-white rounded-xl shadow p-4 flex flex-col" :style="platformCardHeight ? { height: platformCardHeight + 'px' } : {}">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
             >
@@ -411,7 +411,7 @@
           </div>
 
           <!-- Top Topic -->
-          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
+          <div class="bg-white rounded-xl shadow p-4 flex flex-col" :style="platformCardHeight ? { height: platformCardHeight + 'px' } : {}">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
             >
@@ -433,7 +433,7 @@
           </div>
 
           <!-- Geomap -->
-          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
+          <div class="bg-white rounded-xl shadow p-4 flex flex-col" :style="platformCardHeight ? { height: platformCardHeight + 'px' } : {}">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
             >
@@ -708,7 +708,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, nextTick, watch } from "vue";
 import { useRouter } from "vue-router";
 import api from "../services/api";
 import LineChart from "../components/LineChart.vue";
@@ -721,6 +721,8 @@ import unsatisfiedIcon from "../assets/icons/unsatisfied.svg";
 const router = useRouter();
 const loading = ref(true);
 const activeTab = ref("overview");
+const platformCardRef = ref(null);
+const platformCardHeight = ref(null);
 
 const dashboardData = reactive({
   filters: { platforms: [], regions: [], applied: {} },
@@ -916,5 +918,15 @@ const sentimentPlatformDatasets = computed(() => [
   },
 ]);
 
+function measurePlatformCard() {
+  nextTick(() => {
+    if (platformCardRef.value) {
+      platformCardHeight.value = platformCardRef.value.offsetHeight;
+    }
+  });
+}
+
 onMounted(loadDashboard);
+watch(loading, (val) => { if (!val && activeTab.value === 'detail') measurePlatformCard(); });
+watch(activeTab, (val) => { if (val === 'detail') measurePlatformCard(); });
 </script>
