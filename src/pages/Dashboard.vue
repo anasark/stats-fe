@@ -350,38 +350,33 @@
       <div v-else class="space-y-5">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <!-- Mention by Platform -->
-          <div class="bg-white rounded-xl shadow p-4">
+          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
             >
               # Mention by Platform
             </p>
-            <div class="space-y-2">
+            <div class="space-y-3">
               <div
-                v-for="item in dashboardData.mention_by_platform"
+                v-for="item in mentionByPlatformWithPct"
                 :key="item.platform"
-                class="flex items-center gap-2"
+                class="flex items-center gap-3"
               >
-                <span class="text-sm shrink-0">{{
+                <span class="text-lg shrink-0 w-7 text-center">{{
                   platformIcon(item.platform)
                 }}</span>
-                <span class="text-[11px] text-slate-600 w-20 shrink-0">{{
+                <span class="text-[11px] text-slate-600 w-24 shrink-0 capitalize">{{
                   item.platform
                 }}</span>
-                <div
-                  class="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden"
-                >
+                <div class="flex-1 bg-slate-100 rounded h-7 overflow-hidden">
                   <div
-                    class="h-full bg-[#1a237e] rounded-full flex items-center justify-end pr-1.5 text-[10px] text-white font-bold transition-all duration-500"
-                    :style="{ width: (item.percentage || 1) + '%' }"
+                    class="h-full bg-[#3949ab] rounded flex items-center gap-2 px-2.5 transition-all duration-500"
+                    :style="{ width: item.pct + '%' }"
                   >
-                    {{ item.percentage }}%
+                    <span class="text-[11px] text-white font-bold whitespace-nowrap">{{ item.count }}</span>
+                    <span class="text-[11px] text-blue-200 whitespace-nowrap">{{ item.pct }}%</span>
                   </div>
                 </div>
-                <span
-                  class="text-[11px] font-bold text-slate-700 w-7 text-right shrink-0"
-                  >{{ item.count }}</span
-                >
               </div>
               <p
                 v-if="!dashboardData.mention_by_platform.length"
@@ -393,34 +388,36 @@
           </div>
 
           <!-- Mention by Media -->
-          <div class="bg-white rounded-xl shadow p-4">
+          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
             >
               # Mention by Media
             </p>
-            <BarChart
-              :labels="dashboardData.mention_by_media.map((m) => m.media)"
-              :datasets="[
-                {
-                  label: 'Mentions',
-                  data: dashboardData.mention_by_media.map((m) => m.count),
-                  backgroundColor: '#3949ab',
-                  borderRadius: 3,
-                },
-              ]"
-              :horizontal="true"
-            />
+            <div class="overflow-y-auto flex-1">
+              <BarChart
+                :labels="dashboardData.mention_by_media.map((m) => m.media)"
+                :datasets="[
+                  {
+                    label: 'Mentions',
+                    data: dashboardData.mention_by_media.map((m) => m.count),
+                    backgroundColor: '#3949ab',
+                    borderRadius: 3,
+                  },
+                ]"
+                :horizontal="true"
+              />
+            </div>
           </div>
 
           <!-- Top Topic -->
-          <div class="bg-white rounded-xl shadow p-4">
+          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
             >
               Top Topic
             </p>
-            <ol class="space-y-2">
+            <ol class="space-y-2 overflow-y-auto flex-1">
               <li
                 v-for="(topic, i) in dashboardData.top_topics"
                 :key="topic.topic ?? topic"
@@ -436,29 +433,31 @@
           </div>
 
           <!-- Geomap -->
-          <div class="bg-white rounded-xl shadow p-4">
+          <div class="bg-white rounded-xl shadow p-4 flex flex-col">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
             >
               Geomap
             </p>
-            <div
-              class="rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center h-44 relative overflow-hidden"
-            >
+            <div class="overflow-y-auto flex-1">
               <div
-                class="absolute inset-0 bg-gradient-to-br from-blue-300 to-green-200 opacity-20 rounded-lg"
-              ></div>
-              <div class="relative text-center">
-                <div class="text-4xl mb-1">🗺️</div>
-                <p class="text-xs text-slate-500">Indonesia Region Map</p>
-                <div class="flex flex-wrap gap-1 justify-center mt-2">
-                  <span
-                    v-for="p in dashboardData.mention_by_province.slice(0, 3)"
-                    :key="p.province"
-                    class="text-[10px] bg-blue-600 text-white rounded-full px-2 py-0.5"
-                  >
-                    {{ p.province }}
-                  </span>
+                class="rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center h-44 relative overflow-hidden"
+              >
+                <div
+                  class="absolute inset-0 bg-gradient-to-br from-blue-300 to-green-200 opacity-20 rounded-lg"
+                ></div>
+                <div class="relative text-center">
+                  <div class="text-4xl mb-1">🗺️</div>
+                  <p class="text-xs text-slate-500">Indonesia Region Map</p>
+                  <div class="flex flex-wrap gap-1 justify-center mt-2">
+                    <span
+                      v-for="p in dashboardData.mention_by_province.slice(0, 3)"
+                      :key="p.province"
+                      class="text-[10px] bg-blue-600 text-white rounded-full px-2 py-0.5"
+                    >
+                      {{ p.province }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -566,11 +565,24 @@
             >
               # Mention Data List
             </p>
-            <span class="text-[11px] text-slate-400"
-              >{{ dashboardData.meta.total }} records</span
-            >
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[11px] text-slate-400">Rows per page:</span>
+                <select
+                  v-model.number="filters.per_page"
+                  @change="filters.page = 1"
+                  class="text-[11px] border border-slate-200 rounded px-1.5 py-0.5 text-slate-600 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+                >
+                  <option :value="10">10</option>
+                  <option :value="20">20</option>
+                  <option :value="50">50</option>
+                  <option :value="100">100</option>
+                </select>
+              </div>
+              <span class="text-[11px] text-slate-400">{{ tableMeta.total }} records</span>
+            </div>
           </div>
-          <div v-if="dashboardData.table.length" class="overflow-x-auto">
+          <div v-if="dashboardData.table.length" class="overflow-x-auto" key="data-table">
             <table class="w-full text-xs text-left">
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200">
@@ -616,7 +628,7 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="(row, i) in dashboardData.table"
+                  v-for="(row, i) in pagedTable"
                   :key="row.id ?? i"
                   class="border-b border-slate-100 hover:bg-slate-50"
                 >
@@ -661,20 +673,20 @@
             <!-- Pagination -->
             <div class="flex items-center justify-between mt-3 px-1">
               <span class="text-[11px] text-slate-400">
-                Page {{ dashboardData.meta.page }} of {{ dashboardData.meta.pages }}
-                &nbsp;·&nbsp; {{ dashboardData.meta.total }} total
+                Page {{ tableMeta.page }} of {{ tableMeta.pages }}
+                &nbsp;·&nbsp; {{ tableMeta.total }} total
               </span>
               <div class="flex gap-2">
                 <button
-                  @click="filters.page--; loadDashboard()"
-                  :disabled="dashboardData.meta.page <= 1"
+                  @click="filters.page--"
+                  :disabled="tableMeta.page <= 1"
                   class="text-[11px] px-3 py-1 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   ← Prev
                 </button>
                 <button
-                  @click="filters.page++; loadDashboard()"
-                  :disabled="dashboardData.meta.page >= dashboardData.meta.pages"
+                  @click="filters.page++"
+                  :disabled="tableMeta.page >= tableMeta.pages"
                   class="text-[11px] px-3 py-1 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   Next →
@@ -724,7 +736,6 @@ const dashboardData = reactive({
   negative_words: [],
   positive_words: [],
   table: [],
-  meta: { total: 0, page: 1, per_page: 20, pages: 1 },
 });
 
 const filters = reactive({
@@ -735,6 +746,18 @@ const filters = reactive({
   region: "",
   page: 1,
   per_page: 20,
+});
+
+// Client-side pagination over the full table returned by the API
+const pagedTable = computed(() => {
+  const start = (filters.page - 1) * filters.per_page;
+  return dashboardData.table.slice(start, start + filters.per_page);
+});
+
+const tableMeta = computed(() => {
+  const total = dashboardData.table.length;
+  const pages = Math.max(1, Math.ceil(total / filters.per_page));
+  return { total, page: filters.page, per_page: filters.per_page, pages };
 });
 
 const hasActiveFilters = computed(
@@ -767,7 +790,7 @@ async function loadDashboard() {
     dashboardData.negative_words       = Array.isArray(d.negative_words)       ? d.negative_words       : [];
     dashboardData.positive_words       = Array.isArray(d.positive_words)       ? d.positive_words       : [];
     dashboardData.table                = Array.isArray(d.table)                ? d.table                : [];
-    dashboardData.meta                 = d.meta ?? { total: 0, page: 1, per_page: 20, pages: 1 };
+    filters.page                       = 1;
   } catch (e) {
     console.error(e);
   } finally {
@@ -858,6 +881,15 @@ const trendDatasets = computed(() => [
     fill: true,
   },
 ]);
+
+const mentionByPlatformWithPct = computed(() => {
+  const items = dashboardData.mention_by_platform;
+  const total = items.reduce((sum, i) => sum + (i.count || 0), 0);
+  return items.map((i) => ({
+    ...i,
+    pct: total > 0 ? Math.round((i.count / total) * 100) : 0,
+  }));
+});
 
 const sentimentPlatformLabels = computed(() =>
   dashboardData.platform_sentiment.map((p) => p.platform),
