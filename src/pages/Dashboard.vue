@@ -240,7 +240,7 @@
                 <div
                   class="w-12 h-12 mx-auto rounded-full bg-green-100 flex items-center justify-center text-2xl"
                 >
-                  <img :src="satisfiedIcon" class="w-7 h-7" alt="Satisfied" />
+                  <img :src="satisfiedIcon" class="w-12 h-12" alt="Satisfied" />
                 </div>
                 <p class="text-xs text-slate-500 mt-1">Satisfied</p>
                 <p class="text-lg font-bold text-green-600">
@@ -251,7 +251,7 @@
                 <div
                   class="w-12 h-12 mx-auto rounded-full bg-yellow-100 flex items-center justify-center text-2xl"
                 >
-                  <img :src="neutralIcon" class="w-7 h-7" alt="Neutral" />
+                  <img :src="neutralIcon" class="w-12 h-12" alt="Neutral" />
                 </div>
                 <p class="text-xs text-slate-500 mt-1">Neutral</p>
                 <p class="text-lg font-bold text-yellow-500">
@@ -262,7 +262,7 @@
                 <div
                   class="w-12 h-12 mx-auto rounded-full bg-red-100 flex items-center justify-center text-2xl"
                 >
-                  <img :src="unsatisfiedIcon" class="w-7 h-7" alt="Unsatisfied" />
+                  <img :src="unsatisfiedIcon" class="w-12 h-12" alt="Unsatisfied" />
                 </div>
                 <p class="text-xs text-slate-500 mt-1">Unsatisfied</p>
                 <p class="text-lg font-bold text-red-500">
@@ -328,7 +328,7 @@
             >
               Trend
             </p>
-            <LineChart :labels="trendLabels" :datasets="trendDatasets" />
+            <LineChart :table="dashboardData.table" />
           </div>
           <div class="bg-white rounded-xl shadow p-4">
             <p
@@ -340,6 +340,7 @@
               :labels="sentimentPlatformLabels"
               :datasets="sentimentPlatformDatasets"
               :stacked="true"
+              :horizontal="true"
             />
           </div>
         </div>
