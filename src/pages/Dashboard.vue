@@ -182,7 +182,7 @@
 
       <!-- ===================== OVERVIEW ===================== -->
       <div v-if="activeTab === 'overview'" class="space-y-5">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        <div class="grid grid-cols-1 gap-4 items-start" style="grid-template-columns: repeat(1, 1fr);" :style="{ gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,1.8fr) minmax(0,1.5fr) minmax(0,1.5fr)' }">
           <!-- Net Sentiment -->
           <div ref="netSentimentCardRef" class="bg-white rounded-xl shadow p-4" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
             <p
