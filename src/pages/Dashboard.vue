@@ -472,26 +472,10 @@
             >
               Geomap
             </p>
-            <div
-              class="rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center h-44 relative overflow-hidden"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-blue-300 to-green-200 opacity-20 rounded-lg"
-              ></div>
-              <div class="relative text-center">
-                <div class="text-4xl mb-1">🗺️</div>
-                <p class="text-xs text-slate-500">Indonesia Region Map</p>
-                <div class="flex flex-wrap gap-1 justify-center mt-2">
-                  <span
-                    v-for="p in dashboardData.mention_by_province.slice(0, 3)"
-                    :key="p.province"
-                    class="text-[10px] bg-blue-600 text-white rounded-full px-2 py-0.5"
-                  >
-                    {{ p.province }}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <GeoMap
+              :provinces="dashboardData.mention_by_province"
+              :height="320"
+            />
           </div>
         </div>
 
@@ -651,6 +635,7 @@ import { useRouter } from "vue-router";
 import api from "../services/api";
 import LineChart from "../components/LineChart.vue";
 import BarChart from "../components/BarChart.vue";
+import GeoMap from "../components/GeoMap.vue";
 import logo from "../assets/logo.svg";
 import satisfiedIcon from "../assets/icons/satisfied.svg";
 import neutralIcon from "../assets/icons/neutral.svg";
