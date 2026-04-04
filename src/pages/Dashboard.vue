@@ -147,7 +147,7 @@
         <span
           class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium"
         >
-          🔍 Showing filtered results ({{ dashboardData.meta.total }} rows)
+          🔍 Showing filtered results ({{ tableMeta.total }} rows)
         </span>
         <span
           v-if="filters.start_date || filters.end_date"
