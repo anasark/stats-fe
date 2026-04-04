@@ -387,20 +387,43 @@
             </div>
           </div>
 
-          <!-- Mention by Media -->
-          <div class="bg-white rounded-xl shadow p-4 flex flex-col" :style="platformCardHeight ? { height: platformCardHeight + 'px' } : {}">
+          <!-- Engagement (2 cols) -->
+          <div class="lg:col-span-2 bg-white rounded-xl shadow p-4 flex flex-col" :style="platformCardHeight ? { height: platformCardHeight + 'px' } : {}">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
             >
-              # Mention by Media
+              Engagement
             </p>
-            <div class="overflow-y-auto flex-1">
-              <BarChart
-                :labels="mediaLabels"
-                :datasets="mediaDatasets"
-                :horizontal="true"
-              />
+            <div v-if="dashboardData.engagement.length" class="overflow-x-auto flex-1">
+              <table class="w-full text-xs text-left">
+                <thead>
+                  <tr class="border-b border-slate-200">
+                    <th class="pb-2 pr-3 text-slate-400 font-semibold">Platform</th>
+                    <th class="pb-2 pr-3 text-slate-400 font-semibold text-right">Post</th>
+                    <th class="pb-2 pr-3 text-slate-400 font-semibold text-right">Like</th>
+                    <th class="pb-2 pr-3 text-slate-400 font-semibold text-right">Comment</th>
+                    <th class="pb-2 text-slate-400 font-semibold text-right">Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in dashboardData.engagement"
+                    :key="row.platform"
+                    class="border-b border-slate-100"
+                  >
+                    <td class="py-1.5 pr-3 font-medium text-slate-700">
+                      <span>{{ platformIcon(row.platform) }}</span>
+                      {{ row.platform }}
+                    </td>
+                    <td class="py-1.5 pr-3 text-right text-slate-600">{{ (row.total ?? 0).toLocaleString() }}</td>
+                    <td class="py-1.5 pr-3 text-right text-slate-600">{{ (row.likes ?? 0).toLocaleString() }}</td>
+                    <td class="py-1.5 pr-3 text-right text-slate-600">{{ (row.comments ?? 0).toLocaleString() }}</td>
+                    <td class="py-1.5 text-right text-slate-600">{{ (row.shares ?? 0).toLocaleString() }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+            <p v-else class="text-xs text-slate-400 text-center py-6">No engagement data</p>
           </div>
 
           <!-- Top Topic -->
@@ -424,103 +447,36 @@
               </li>
             </ol>
           </div>
-
-          <!-- Geomap -->
-          <div class="bg-white rounded-xl shadow p-4 flex flex-col" :style="platformCardHeight ? { height: platformCardHeight + 'px' } : {}">
-            <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3 shrink-0"
-            >
-              Geomap
-            </p>
-            <div class="overflow-y-auto flex-1">
-              <div
-                class="rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center h-44 relative overflow-hidden"
-              >
-                <div
-                  class="absolute inset-0 bg-gradient-to-br from-blue-300 to-green-200 opacity-20 rounded-lg"
-                ></div>
-                <div class="relative text-center">
-                  <div class="text-4xl mb-1">🗺️</div>
-                  <p class="text-xs text-slate-500">Indonesia Region Map</p>
-                  <div class="flex flex-wrap gap-1 justify-center mt-2">
-                    <span
-                      v-for="p in dashboardData.mention_by_province.slice(0, 3)"
-                      :key="p.province"
-                      class="text-[10px] bg-blue-600 text-white rounded-full px-2 py-0.5"
-                    >
-                      {{ p.province }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <!-- Engagement -->
+          <!-- Geomap -->
           <div class="bg-white rounded-xl shadow p-4">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
             >
-              Engagement
+              Geomap
             </p>
-            <div v-if="dashboardData.engagement.length" class="overflow-x-auto">
-              <table class="w-full text-xs text-left">
-                <thead>
-                  <tr class="border-b border-slate-200">
-                    <th class="pb-2 pr-3 text-slate-400 font-semibold">
-                      Platform
-                    </th>
-                    <th
-                      class="pb-2 pr-3 text-slate-400 font-semibold text-right"
-                    >
-                      Post
-                    </th>
-                    <th
-                      class="pb-2 pr-3 text-slate-400 font-semibold text-right"
-                    >
-                      Like
-                    </th>
-                    <th
-                      class="pb-2 pr-3 text-slate-400 font-semibold text-right"
-                    >
-                      Comment
-                    </th>
-                    <th class="pb-2 text-slate-400 font-semibold text-right">
-                      Share
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="row in dashboardData.engagement"
-                    :key="row.platform"
-                    class="border-b border-slate-100"
+            <div
+              class="rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center h-44 relative overflow-hidden"
+            >
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-blue-300 to-green-200 opacity-20 rounded-lg"
+              ></div>
+              <div class="relative text-center">
+                <div class="text-4xl mb-1">🗺️</div>
+                <p class="text-xs text-slate-500">Indonesia Region Map</p>
+                <div class="flex flex-wrap gap-1 justify-center mt-2">
+                  <span
+                    v-for="p in dashboardData.mention_by_province.slice(0, 3)"
+                    :key="p.province"
+                    class="text-[10px] bg-blue-600 text-white rounded-full px-2 py-0.5"
                   >
-                    <td class="py-1.5 pr-3 font-medium text-slate-700">
-                      <span>{{ platformIcon(row.platform) }}</span>
-                      {{ row.platform }}
-                    </td>
-                    <td class="py-1.5 pr-3 text-right text-slate-600">
-                      {{ (row.total ?? 0).toLocaleString() }}
-                    </td>
-                    <td class="py-1.5 pr-3 text-right text-slate-600">
-                      {{ (row.likes ?? 0).toLocaleString() }}
-                    </td>
-                    <td class="py-1.5 pr-3 text-right text-slate-600">
-                      {{ (row.comments ?? 0).toLocaleString() }}
-                    </td>
-                    <td class="py-1.5 text-right text-slate-600">
-                      {{ (row.shares ?? 0).toLocaleString() }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    {{ p.province }}
+                  </span>
+                </div>
+              </div>
             </div>
-            <p v-else class="text-xs text-slate-400 text-center py-6">
-              No engagement data
-            </p>
           </div>
 
           <!-- Mention by Province -->
@@ -894,13 +850,25 @@ const provinceDatasets = computed(() => [
   },
 ]);
 
-const mediaLabels = computed(() =>
-  dashboardData.mention_by_media.map((m) => m.media),
-);
+const mentionByMedia = computed(() => {
+  if (dashboardData.mention_by_media.length) return dashboardData.mention_by_media;
+  // Derive from table rows grouped by author when API returns no media data
+  const counts = {};
+  dashboardData.table.forEach((row) => {
+    const key = row.author || row.media || row.source;
+    if (key && key.trim()) counts[key] = (counts[key] || 0) + 1;
+  });
+  return Object.entries(counts)
+    .map(([media, count]) => ({ media, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+});
+
+const mediaLabels = computed(() => mentionByMedia.value.map((m) => m.media));
 const mediaDatasets = computed(() => [
   {
     label: 'Mentions',
-    data: dashboardData.mention_by_media.map((m) => m.count),
+    data: mentionByMedia.value.map((m) => m.count),
     backgroundColor: '#3949ab',
     borderRadius: 3,
   },
