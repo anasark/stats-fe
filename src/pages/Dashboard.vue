@@ -182,7 +182,7 @@
 
       <!-- ===================== OVERVIEW ===================== -->
       <div v-if="activeTab === 'overview'" class="space-y-5">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
           <!-- Net Sentiment -->
           <div ref="netSentimentCardRef" class="bg-white rounded-xl shadow p-4" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
             <p
@@ -272,51 +272,47 @@
             </div>
           </div>
 
-          <!-- Word Clouds -->
-          <div class="grid grid-cols-2 gap-3" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
-            <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0 h-full">
-              <p
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
-              >
-                Negative Word Cloud
-              </p>
-              <div
-                class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0"
-              >
-                <template v-if="dashboardData.negative_words.length">
-                  <span
-                    v-for="w in dashboardData.negative_words"
-                    :key="w.word"
-                    :style="{ fontSize: `${wordSize(dashboardData.negative_words, w.count)}px` }"
-                    class="text-red-400 hover:text-red-600 cursor-default leading-tight font-medium"
-                  >
-                    {{ w.word }}
-                  </span>
-                </template>
-                <p v-else class="text-gray-400 text-sm text-center">No data</p>
-              </div>
+          <!-- Negative Word Cloud -->
+          <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
+            <p
+              class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
+            >
+              Negative Word Cloud
+            </p>
+            <div class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0">
+              <template v-if="dashboardData.negative_words.length">
+                <span
+                  v-for="w in dashboardData.negative_words"
+                  :key="w.word"
+                  :style="{ fontSize: `${wordSize(dashboardData.negative_words, w.count)}px` }"
+                  class="text-red-400 hover:text-red-600 cursor-default leading-tight font-medium"
+                >
+                  {{ w.word }}
+                </span>
+              </template>
+              <p v-else class="text-gray-400 text-sm text-center">No data</p>
             </div>
-            <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0 h-full">
-              <p
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
-              >
-                Positive Word Cloud
-              </p>
-              <div
-                class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0"
-              >
-                <template v-if="dashboardData.positive_words.length">
-                  <span
-                    v-for="w in dashboardData.positive_words"
-                    :key="w.word"
-                    :style="{ fontSize: `${wordSize(dashboardData.positive_words, w.count)}px` }"
-                    class="text-blue-400 hover:text-blue-600 cursor-default leading-tight font-medium"
-                  >
-                    {{ w.word }}
-                  </span>
-                </template>
-                <p v-else class="text-gray-400 text-sm text-center">No data</p>
-              </div>
+          </div>
+
+          <!-- Positive Word Cloud -->
+          <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
+            <p
+              class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
+            >
+              Positive Word Cloud
+            </p>
+            <div class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0">
+              <template v-if="dashboardData.positive_words.length">
+                <span
+                  v-for="w in dashboardData.positive_words"
+                  :key="w.word"
+                  :style="{ fontSize: `${wordSize(dashboardData.positive_words, w.count)}px` }"
+                  class="text-blue-400 hover:text-blue-600 cursor-default leading-tight font-medium"
+                >
+                  {{ w.word }}
+                </span>
+              </template>
+              <p v-else class="text-gray-400 text-sm text-center">No data</p>
             </div>
           </div>
         </div>
