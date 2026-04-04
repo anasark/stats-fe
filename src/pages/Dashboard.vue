@@ -315,18 +315,38 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="bg-white rounded-xl shadow p-4">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
             >
               Trend
             </p>
+            <div v-if="dashboardData.mention_by_platform.length" class="flex flex-wrap gap-3 mb-3">
+              <span
+                v-for="p in dashboardData.mention_by_platform"
+                :key="p.platform"
+                class="flex items-center gap-1.5 text-[11px] text-slate-600 capitalize"
+              >
+                <PlatformIcon :platform="p.platform" :size="14" />
+                {{ p.platform }}
+              </span>
+            </div>
             <LineChart :table="dashboardData.table" />
           </div>
           <div class="bg-white rounded-xl shadow p-4">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
             >
               Sentiment by Platform
             </p>
+            <div v-if="dashboardData.platform_sentiment.length" class="flex flex-wrap gap-3 mb-3">
+              <span
+                v-for="p in dashboardData.platform_sentiment"
+                :key="p.platform"
+                class="flex items-center gap-1.5 text-[11px] text-slate-600 capitalize"
+              >
+                <PlatformIcon :platform="p.platform" :size="14" />
+                {{ p.platform }}
+              </span>
+            </div>
             <BarChart
               :labels="sentimentPlatformLabels"
               :datasets="sentimentPlatformDatasets"
@@ -353,9 +373,9 @@
                 :key="item.platform"
                 class="flex items-center gap-3"
               >
-                <span class="text-lg shrink-0 w-7 text-center">{{
-                  platformIcon(item.platform)
-                }}</span>
+                <span class="shrink-0 w-7 flex items-center justify-center">
+                  <PlatformIcon :platform="item.platform" :size="20" />
+                </span>
                 <span class="text-[11px] text-slate-600 w-24 shrink-0 capitalize">{{
                   item.platform
                 }}</span>
@@ -403,8 +423,10 @@
                     class="border-b border-slate-100"
                   >
                     <td class="py-1.5 pr-3 font-medium text-slate-700">
-                      <span>{{ platformIcon(row.platform) }}</span>
-                      {{ row.platform }}
+                      <span class="inline-flex items-center gap-1.5">
+                        <PlatformIcon :platform="row.platform" :size="14" />
+                        {{ row.platform }}
+                      </span>
                     </td>
                     <td class="py-1.5 pr-3 text-right text-slate-600">{{ (row.total ?? 0).toLocaleString() }}</td>
                     <td class="py-1.5 pr-3 text-right text-slate-600">{{ (row.likes ?? 0).toLocaleString() }}</td>
@@ -554,7 +576,10 @@
                     {{ row.date }}
                   </td>
                   <td class="px-3 py-2 text-slate-700 whitespace-nowrap">
-                    {{ platformIcon(row.platform) }} {{ row.platform }}
+                    <span class="inline-flex items-center gap-1.5">
+                      <PlatformIcon :platform="row.platform" :size="13" />
+                      {{ row.platform }}
+                    </span>
                   </td>
                   <td class="px-3 py-2 text-slate-600 whitespace-nowrap">
                     {{ row.region }}
@@ -633,6 +658,7 @@ import api from "../services/api";
 import LineChart from "../components/LineChart.vue";
 import BarChart from "../components/BarChart.vue";
 import GeoMap from "../components/GeoMap.vue";
+import PlatformIcon from "../components/PlatformIcon.vue";
 import logo from "../assets/logo.svg";
 import satisfiedIcon from "../assets/icons/satisfied.svg";
 import neutralIcon from "../assets/icons/neutral.svg";

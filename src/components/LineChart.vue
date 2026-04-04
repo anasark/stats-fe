@@ -8,7 +8,7 @@
           @click="dropdownOpen = !dropdownOpen"
           class="bg-indigo-50 text-indigo-900 text-[11px] px-3 py-1.5 rounded flex items-center gap-2 min-w-[150px] justify-between border border-indigo-100"
         >
-          <span>{{ selectedCount > 0 ? `${selectedCount} selected` : 'Multiple selections' }}</span>
+            <span>{{ selectedCount > 0 ? `${selectedCount} selected` : 'Multiple selections' }}</span>
           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
@@ -28,10 +28,7 @@
               @change="togglePlatform(platform)"
               class="w-3 h-3 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
-            <span
-              class="w-2 h-2 rounded-full shrink-0"
-              :style="{ backgroundColor: platformColors[platform] }"
-            ></span>
+            <PlatformIcon :platform="platform" :size="13" />
             {{ platform }}
           </label>
         </div>
@@ -60,6 +57,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
+import PlatformIcon from "./PlatformIcon.vue";
 import {
   Chart,
   LineController,
