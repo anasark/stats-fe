@@ -230,6 +230,7 @@ function init() {
         mode: 'index',
       },
       plugins: {
+        datalabels: { display: false },
         legend: {
           position: "top",
           align: "center",
