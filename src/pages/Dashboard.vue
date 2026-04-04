@@ -88,21 +88,16 @@
           </div>
           <button
             @click="applyFilters"
-            class="bg-white text-[#1a237e] text-[11px] font-bold px-3 py-1.5 rounded hover:bg-blue-50 transition"
+            class="bg-white text-[#1a237e] text-[11px] font-bold px-3 h-7 rounded hover:bg-blue-50 transition border border-transparent"
           >
             Apply
           </button>
           <button
             @click="resetFilters"
-            class="bg-white/10 text-white text-[11px] px-3 py-1.5 rounded hover:bg-white/20 transition border border-white/20"
+            class="bg-white/10 text-white text-[11px] px-3 h-7 rounded hover:bg-white/20 transition border border-white/20"
           >
             Reset
           </button>
-          <div
-            class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm cursor-pointer"
-          >
-            👤
-          </div>
         </div>
       </div>
 
