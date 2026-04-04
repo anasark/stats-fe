@@ -450,6 +450,25 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Mention by Province -->
+          <div class="bg-white rounded-xl shadow p-4">
+            <p
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
+            >
+              # Mention by Province
+            </p>
+            <div v-if="dashboardData.mention_by_province.length">
+              <BarChart
+                :labels="provinceLabels"
+                :datasets="provinceDatasets"
+                :horizontal="true"
+              />
+            </div>
+            <p v-else class="text-xs text-slate-400 text-center py-6">
+              No province data
+            </p>
+          </div>
+
           <!-- Geomap -->
           <div class="bg-white rounded-xl shadow p-4">
             <p
@@ -477,25 +496,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Mention by Province -->
-          <div class="bg-white rounded-xl shadow p-4">
-            <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3"
-            >
-              # Mention by Province
-            </p>
-            <div v-if="dashboardData.mention_by_province.length">
-              <BarChart
-                :labels="provinceLabels"
-                :datasets="provinceDatasets"
-                :horizontal="true"
-              />
-            </div>
-            <p v-else class="text-xs text-slate-400 text-center py-6">
-              No province data
-            </p>
           </div>
         </div>
 
