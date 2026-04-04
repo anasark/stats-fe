@@ -504,9 +504,10 @@
               <span class="text-[11px] text-slate-400">{{ tableMeta.total }} records</span>
             </div>
           </div>
-          <div v-if="dashboardData.table.length" class="overflow-x-auto" key="data-table">
+          <div v-if="dashboardData.table.length" key="data-table">
+            <div class="overflow-auto" style="max-height: calc(100vh - 260px);">
             <table class="w-full text-xs text-left">
-              <thead>
+              <thead class="sticky top-0 z-10">
                 <tr class="bg-slate-50 border-b border-slate-200">
                   <th
                     class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap"
@@ -592,6 +593,7 @@
                 </tr>
               </tbody>
             </table>
+            </div>
             <!-- Pagination -->
             <div class="flex items-center justify-between mt-3 px-1">
               <span class="text-[11px] text-slate-400">
