@@ -182,9 +182,9 @@
 
       <!-- ===================== OVERVIEW ===================== -->
       <div v-if="activeTab === 'overview'" class="space-y-5">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
           <!-- Net Sentiment -->
-          <div class="bg-white rounded-xl shadow p-4">
+          <div ref="netSentimentCardRef" class="bg-white rounded-xl shadow p-4" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
             >
@@ -229,7 +229,7 @@
           </div>
 
           <!-- Sentiment % -->
-          <div class="bg-white rounded-xl shadow p-4">
+          <div ref="sentimentPctCardRef" class="bg-white rounded-xl shadow p-4 flex flex-col" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
             >
@@ -273,15 +273,15 @@
           </div>
 
           <!-- Word Clouds -->
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-white rounded-xl shadow p-3">
+          <div class="grid grid-cols-2 gap-3" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
+            <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0 h-full">
               <p
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2"
+                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
               >
                 Negative Word Cloud
               </p>
               <div
-                class="flex flex-wrap gap-1 items-center justify-center min-h-[80px]"
+                class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0"
               >
                 <template v-if="dashboardData.negative_words.length">
                   <span
@@ -296,14 +296,14 @@
                 <p v-else class="text-gray-400 text-sm text-center">No data</p>
               </div>
             </div>
-            <div class="bg-white rounded-xl shadow p-3">
+            <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0 h-full">
               <p
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2"
+                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
               >
                 Positive Word Cloud
               </p>
               <div
-                class="flex flex-wrap gap-1 items-center justify-center min-h-[80px]"
+                class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0"
               >
                 <template v-if="dashboardData.positive_words.length">
                   <span
@@ -723,6 +723,9 @@ const loading = ref(true);
 const activeTab = ref("overview");
 const platformCardRef = ref(null);
 const platformCardHeight = ref(null);
+const netSentimentCardRef = ref(null);
+const sentimentPctCardRef = ref(null);
+const overviewRowHeight = ref(null);
 
 const dashboardData = reactive({
   filters: { platforms: [], regions: [], applied: {} },
@@ -926,7 +929,24 @@ function measurePlatformCard() {
   });
 }
 
+function measureNetSentimentCard() {
+  nextTick(() => {
+    const h1 = netSentimentCardRef.value?.offsetHeight ?? 0;
+    const h2 = sentimentPctCardRef.value?.offsetHeight ?? 0;
+    const h = Math.max(h1, h2);
+    if (h > 0) overviewRowHeight.value = h;
+  });
+}
+
 onMounted(loadDashboard);
-watch(loading, (val) => { if (!val && activeTab.value === 'detail') measurePlatformCard(); });
-watch(activeTab, (val) => { if (val === 'detail') measurePlatformCard(); });
+watch(loading, (val) => {
+  if (!val) {
+    if (activeTab.value === 'detail') measurePlatformCard();
+    if (activeTab.value === 'overview') measureNetSentimentCard();
+  }
+});
+watch(activeTab, (val) => {
+  if (val === 'detail') measurePlatformCard();
+  if (val === 'overview') measureNetSentimentCard();
+});
 </script>
