@@ -396,15 +396,8 @@
             </p>
             <div class="overflow-y-auto flex-1">
               <BarChart
-                :labels="dashboardData.mention_by_media.map((m) => m.media)"
-                :datasets="[
-                  {
-                    label: 'Mentions',
-                    data: dashboardData.mention_by_media.map((m) => m.count),
-                    backgroundColor: '#3949ab',
-                    borderRadius: 3,
-                  },
-                ]"
+                :labels="mediaLabels"
+                :datasets="mediaDatasets"
                 :horizontal="true"
               />
             </div>
@@ -539,15 +532,8 @@
             </p>
             <div v-if="dashboardData.mention_by_province.length">
               <BarChart
-                :labels="dashboardData.mention_by_province.map((p) => p.province)"
-                :datasets="[
-                  {
-                    label: 'Mentions',
-                    data: dashboardData.mention_by_province.map((p) => p.count),
-                    backgroundColor: '#1a237e',
-                    borderRadius: 3,
-                  },
-                ]"
+                :labels="provinceLabels"
+                :datasets="provinceDatasets"
                 :horizontal="true"
               />
             </div>
@@ -895,6 +881,30 @@ const mentionByPlatformWithPct = computed(() => {
     pct: total > 0 ? Math.round((i.count / total) * 100) : 0,
   }));
 });
+
+const provinceLabels = computed(() =>
+  dashboardData.mention_by_province.map((p) => p.province),
+);
+const provinceDatasets = computed(() => [
+  {
+    label: 'Mentions',
+    data: dashboardData.mention_by_province.map((p) => p.count),
+    backgroundColor: '#1a237e',
+    borderRadius: 3,
+  },
+]);
+
+const mediaLabels = computed(() =>
+  dashboardData.mention_by_media.map((m) => m.media),
+);
+const mediaDatasets = computed(() => [
+  {
+    label: 'Mentions',
+    data: dashboardData.mention_by_media.map((m) => m.count),
+    backgroundColor: '#3949ab',
+    borderRadius: 3,
+  },
+]);
 
 const sentimentPlatformLabels = computed(() =>
   dashboardData.platform_sentiment.map((p) => p.platform),
