@@ -491,7 +491,6 @@
             </p>
             <GeoMap
               :provinces="dashboardData.mention_by_province"
-              :height="320"
             />
           </div>
         </div>

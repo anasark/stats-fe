@@ -1,9 +1,9 @@
 <template>
-  <div ref="mapEl" class="w-full rounded-lg overflow-hidden" :style="{ height: height + 'px' }"></div>
+  <div ref="mapEl" class="w-full rounded-lg overflow-hidden" :style="{ height: computedHeight + 'px' }"></div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -16,7 +16,18 @@ const props = defineProps({
     type: Number,
     default: 320,
   },
+  aspectRatio: {
+    type: Number,
+    default: 16 / 9,
+  },
 });
+
+const containerWidth = ref(0);
+const computedHeight = computed(() =>
+  containerWidth.value > 0
+    ? Math.round(containerWidth.value / props.aspectRatio)
+    : props.height
+);
 
 // Approximate centre coordinates for Indonesian provinces
 const PROVINCE_COORDS = {
@@ -94,6 +105,7 @@ function getCoords(name) {
 const mapEl = ref(null);
 let map = null;
 let markerLayer = null;
+let resizeObserver = null;
 
 function buildMarkers() {
   if (!map) return;
@@ -135,6 +147,16 @@ function buildMarkers() {
 }
 
 onMounted(() => {
+  resizeObserver = new ResizeObserver((entries) => {
+    const entry = entries[0];
+    if (!entry) return;
+    containerWidth.value = entry.contentRect.width;
+    if (map) {
+      map.invalidateSize();
+    }
+  });
+  resizeObserver.observe(mapEl.value);
+
   map = L.map(mapEl.value, {
     center: [-2.5, 118],
     zoom: 4,
@@ -151,6 +173,10 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
   if (map) {
     map.remove();
     map = null;
