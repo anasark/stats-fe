@@ -9,6 +9,26 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue(), tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('chart.js') || id.includes('chartjs-plugin-datalabels')) {
+              return 'chart-vendor'
+            }
+            if (id.includes('leaflet')) {
+              return 'leaflet-vendor'
+            }
+            if (id.includes('@iconify')) {
+              return 'iconify-vendor'
+            }
+            if (id.includes('node_modules')) {
+              return 'vendor'
+            }
+          },
+        },
+      },
+    },
     server: {
       proxy: {
         '/api': {
