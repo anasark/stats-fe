@@ -526,42 +526,56 @@
               <thead class="sticky top-0 z-10">
                 <tr class="bg-slate-50 border-b border-slate-200">
                   <th
-                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap"
+                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
+                    @click="toggleSort('date')"
                   >
                     Date
+                    <span class="ml-0.5 text-[10px]">{{ sortKey === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
                   <th
-                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap"
+                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
+                    @click="toggleSort('platform')"
                   >
                     Platform
+                    <span class="ml-0.5 text-[10px]">{{ sortKey === 'platform' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
                   <th
-                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap"
+                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
+                    @click="toggleSort('region')"
                   >
                     Region
+                    <span class="ml-0.5 text-[10px]">{{ sortKey === 'region' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
                   <th class="px-3 py-2 text-slate-500 font-semibold">
                     Content
                   </th>
                   <th
-                    class="px-3 py-2 text-slate-500 font-semibold text-right whitespace-nowrap"
+                    class="px-3 py-2 text-slate-500 font-semibold text-right whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
+                    @click="toggleSort('likes')"
                   >
                     Like
+                    <span class="ml-0.5 text-[10px]">{{ sortKey === 'likes' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
                   <th
-                    class="px-3 py-2 text-slate-500 font-semibold text-right whitespace-nowrap"
+                    class="px-3 py-2 text-slate-500 font-semibold text-right whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
+                    @click="toggleSort('comments')"
                   >
                     Comment
+                    <span class="ml-0.5 text-[10px]">{{ sortKey === 'comments' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
                   <th
-                    class="px-3 py-2 text-slate-500 font-semibold text-right whitespace-nowrap"
+                    class="px-3 py-2 text-slate-500 font-semibold text-right whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
+                    @click="toggleSort('shares')"
                   >
                     Share
+                    <span class="ml-0.5 text-[10px]">{{ sortKey === 'shares' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
                   <th
-                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap"
+                    class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
+                    @click="toggleSort('sentiment')"
                   >
                     Sentiment
+                    <span class="ml-0.5 text-[10px]">{{ sortKey === 'sentiment' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
                 </tr>
               </thead>
@@ -698,14 +712,44 @@ const filters = reactive({
   per_page: 20,
 });
 
+// Sorting
+const sortKey = ref('');
+const sortDir = ref('asc');
+
+function toggleSort(key) {
+  if (sortKey.value === key) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortKey.value = key;
+    sortDir.value = 'asc';
+  }
+  filters.page = 1;
+}
+
+const sortedTable = computed(() => {
+  if (!sortKey.value) return dashboardData.table;
+  return [...dashboardData.table].sort((a, b) => {
+    let va = a[sortKey.value] ?? '';
+    let vb = b[sortKey.value] ?? '';
+    if (typeof va === 'number' && typeof vb === 'number') {
+      return sortDir.value === 'asc' ? va - vb : vb - va;
+    }
+    va = String(va).toLowerCase();
+    vb = String(vb).toLowerCase();
+    if (va < vb) return sortDir.value === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir.value === 'asc' ? 1 : -1;
+    return 0;
+  });
+});
+
 // Client-side pagination over the full table returned by the API
 const pagedTable = computed(() => {
   const start = (filters.page - 1) * filters.per_page;
-  return dashboardData.table.slice(start, start + filters.per_page);
+  return sortedTable.value.slice(start, start + filters.per_page);
 });
 
 const tableMeta = computed(() => {
-  const total = dashboardData.table.length;
+  const total = sortedTable.value.length;
   const pages = Math.max(1, Math.ceil(total / filters.per_page));
   return { total, page: filters.page, per_page: filters.per_page, pages };
 });
