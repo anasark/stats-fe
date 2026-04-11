@@ -315,7 +315,7 @@
             >
               Sentiment by Platform
             </p>
-            <div v-if="dashboardData.platform_sentiment.length" class="flex flex-wrap gap-3 mb-3">
+            <div v-if="dashboardData.platform_sentiment.length" class="flex flex-wrap gap-4 mb-3">
               <span
                 v-for="p in dashboardData.platform_sentiment"
                 :key="p.platform"
@@ -325,12 +325,15 @@
                 {{ p.platform }}
               </span>
             </div>
-            <BarChart
-              :labels="sentimentPlatformLabels"
-              :datasets="sentimentPlatformDatasets"
-              :stacked="true"
-              :horizontal="true"
-            />
+            <div class="flex-1 min-h-0">
+              <BarChart
+                :labels="sentimentPlatformLabels"
+                :datasets="sentimentPlatformDatasets"
+                :stacked="true"
+                :horizontal="true"
+                :fill="true"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -590,7 +593,7 @@
                   <td class="px-3 py-2">
                     <span
                       :class="{
-                        'bg-green-100 text-green-700':
+                        'bg-blue-100 text-blue-700':
                           row.sentiment === 'positive',
                         'bg-red-100 text-red-700': row.sentiment === 'negative',
                         'bg-yellow-100 text-yellow-700':

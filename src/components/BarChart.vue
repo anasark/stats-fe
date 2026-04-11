@@ -2,7 +2,7 @@
   <div v-if="!hasData" class="flex items-center justify-center h-40 text-gray-400 text-sm">
     No data available
   </div>
-  <div v-else class="relative" :style="{ height: stacked && horizontal ? (labels.length * 52 + 60) + 'px' : stacked ? '350px' : 'auto' }">
+  <div v-else class="relative" :style="fill ? { height: '100%' } : { height: stacked && horizontal ? (labels.length * 52 + 60) + 'px' : stacked ? '350px' : 'auto' }">
     <canvas ref="canvas"></canvas>
   </div>
 </template>
@@ -35,6 +35,7 @@ const props = defineProps({
   datasets: { type: Array, default: () => [] },
   horizontal: { type: Boolean, default: false },
   stacked: { type: Boolean, default: false },
+  fill: { type: Boolean, default: false },
 });
 
 const canvas = ref(null);
@@ -76,7 +77,7 @@ function init() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: !isStacked,
+      maintainAspectRatio: !isStacked && !props.fill,
       indexAxis: isHorizontal ? "y" : "x",
       plugins: {
         legend: {
