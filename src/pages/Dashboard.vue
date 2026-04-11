@@ -176,30 +176,30 @@
       </div>
 
       <!-- ===================== OVERVIEW ===================== -->
-      <div v-if="activeTab === 'overview'" class="space-y-5">
-        <div class="overview-row grid grid-cols-1 gap-4 items-start">
+      <div v-if="activeTab === 'overview'">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-stretch">
           <!-- Net Sentiment -->
-          <div ref="netSentimentCardRef" class="bg-white rounded-xl shadow p-4" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
+          <div ref="netSentimentCardRef" class="bg-white rounded-xl shadow p-4 flex flex-col">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
             >
               Net Sentiment
             </p>
-            <div class="flex flex-col items-center justify-center py-2">
-              <div class="relative w-36 h-[72px] overflow-hidden">
-                <svg viewBox="0 0 120 60" class="w-full">
+            <div class="flex-1 flex flex-col items-center justify-center">
+              <div class="relative w-full h-[140px] overflow-hidden px-4">
+                <svg viewBox="0 0 120 60" class="w-full h-full">
                   <path
                     d="M10,60 A50,50 0 0,1 110,60"
                     fill="none"
                     stroke="#e2e8f0"
-                    stroke-width="12"
+                    stroke-width="10"
                     stroke-linecap="round"
                   />
                   <path
                     d="M10,60 A50,50 0 0,1 110,60"
                     fill="none"
                     :stroke="gaugeColor"
-                    stroke-width="12"
+                    stroke-width="10"
                     stroke-linecap="round"
                     stroke-dasharray="157"
                     :stroke-dashoffset="gaugeDashOffset"
@@ -214,53 +214,53 @@
                   <circle cx="60" cy="60" r="4" fill="#334155" />
                 </svg>
                 <div class="absolute inset-x-0 bottom-0 text-center">
-                  <span class="text-xl font-bold text-slate-700"
+                  <span class="text-4xl font-bold text-slate-700"
                     >{{ dashboardData.net_sentiment }}</span
                   >
                 </div>
               </div>
-              <p class="text-[10px] text-slate-400 mt-2">← Free Period: +38%</p>
+              <p class="text-[11px] text-slate-400 mt-3">← Free Period: +38%</p>
             </div>
           </div>
 
           <!-- Sentiment % -->
-          <div ref="sentimentPctCardRef" class="bg-white rounded-xl shadow p-4 flex flex-col" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
+          <div ref="sentimentPctCardRef" class="bg-white rounded-xl shadow p-4 flex flex-col">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
             >
               Sentiment Percentage
             </p>
-            <div class="flex justify-around items-center py-2">
+            <div class="flex-1 flex justify-around items-center">
               <div class="text-center">
                 <div
-                  class="w-12 h-12 mx-auto rounded-full bg-green-100 flex items-center justify-center text-2xl"
+                  class="w-16 h-16 mx-auto rounded-full bg-blue-100 flex items-center justify-center"
                 >
-                  <img :src="satisfiedIcon" class="w-12 h-12" alt="Satisfied" />
+                  <img :src="satisfiedIcon" class="w-16 h-16" alt="Satisfied" />
                 </div>
-                <p class="text-xs text-slate-500 mt-1">Satisfied</p>
-                <p class="text-lg font-bold text-green-600">
+                <p class="text-xs text-slate-500 mt-4">Satisfied</p>
+                <p class="text-xl font-bold mt-1" style="color:#1e40af">
                   {{ dashboardData.sentiment_percentage.positive }}%
                 </p>
               </div>
               <div class="text-center">
                 <div
-                  class="w-12 h-12 mx-auto rounded-full bg-yellow-100 flex items-center justify-center text-2xl"
+                  class="w-16 h-16 mx-auto rounded-full bg-yellow-100 flex items-center justify-center"
                 >
-                  <img :src="neutralIcon" class="w-12 h-12" alt="Neutral" />
+                  <img :src="neutralIcon" class="w-16 h-16" alt="Neutral" />
                 </div>
-                <p class="text-xs text-slate-500 mt-1">Neutral</p>
-                <p class="text-lg font-bold text-yellow-500">
+                <p class="text-xs text-slate-500 mt-4">Neutral</p>
+                <p class="text-xl font-bold text-yellow-500 mt-1">
                   {{ dashboardData.sentiment_percentage.neutral }}%
                 </p>
               </div>
               <div class="text-center">
                 <div
-                  class="w-12 h-12 mx-auto rounded-full bg-red-100 flex items-center justify-center text-2xl"
+                  class="w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center"
                 >
-                  <img :src="unsatisfiedIcon" class="w-12 h-12" alt="Unsatisfied" />
+                  <img :src="unsatisfiedIcon" class="w-16 h-16" alt="Unsatisfied" />
                 </div>
-                <p class="text-xs text-slate-500 mt-1">Unsatisfied</p>
-                <p class="text-lg font-bold text-red-500">
+                <p class="text-xs text-slate-500 mt-4">Unsatisfied</p>
+                <p class="text-xl font-bold text-red-500 mt-1">
                   {{ dashboardData.sentiment_percentage.negative }}%
                 </p>
               </div>
@@ -268,52 +268,30 @@
           </div>
 
           <!-- Negative Word Cloud -->
-          <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
+          <div class="bg-white rounded-xl shadow p-3 flex flex-col" style="min-height:220px">
             <p
               class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
             >
               Negative Word Cloud
             </p>
-            <div class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0">
-              <template v-if="dashboardData.negative_words.length">
-                <span
-                  v-for="w in dashboardData.negative_words"
-                  :key="w.word"
-                  :style="{ fontSize: `${wordSize(dashboardData.negative_words, w.count)}px` }"
-                  class="text-red-400 hover:text-red-600 cursor-default leading-tight font-medium"
-                >
-                  {{ w.word }}
-                </span>
-              </template>
-              <p v-else class="text-gray-400 text-sm text-center">No data</p>
+            <div class="flex-1 min-h-0">
+              <WordCloud :words="dashboardData.negative_words" color="red" class="w-full h-full" />
             </div>
           </div>
 
           <!-- Positive Word Cloud -->
-          <div class="bg-white rounded-xl shadow p-3 flex flex-col min-h-0" :style="overviewRowHeight ? { height: overviewRowHeight + 'px' } : {}">
+          <div class="bg-white rounded-xl shadow p-3 flex flex-col" style="min-height:220px">
             <p
               class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 shrink-0"
             >
               Positive Word Cloud
             </p>
-            <div class="flex flex-wrap gap-1 content-start overflow-y-auto flex-1 min-h-0">
-              <template v-if="dashboardData.positive_words.length">
-                <span
-                  v-for="w in dashboardData.positive_words"
-                  :key="w.word"
-                  :style="{ fontSize: `${wordSize(dashboardData.positive_words, w.count)}px` }"
-                  class="text-blue-400 hover:text-blue-600 cursor-default leading-tight font-medium"
-                >
-                  {{ w.word }}
-                </span>
-              </template>
-              <p v-else class="text-gray-400 text-sm text-center">No data</p>
+            <div class="flex-1 min-h-0">
+              <WordCloud :words="dashboardData.positive_words" color="blue" class="w-full h-full" />
             </div>
           </div>
-        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-white rounded-xl shadow p-4">
+          <div class="bg-white rounded-xl shadow p-4 lg:col-span-2 flex flex-col">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
             >
@@ -331,7 +309,7 @@
             </div>
             <LineChart :table="dashboardData.table" />
           </div>
-          <div class="bg-white rounded-xl shadow p-4">
+          <div class="bg-white rounded-xl shadow p-4 lg:col-span-2 flex flex-col">
             <p
               class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
             >
@@ -672,6 +650,7 @@ import LineChart from "../components/LineChart.vue";
 import BarChart from "../components/BarChart.vue";
 import GeoMap from "../components/GeoMap.vue";
 import PlatformIcon from "../components/PlatformIcon.vue";
+import WordCloud from "../components/WordCloud.vue";
 import logo from "../assets/logo.svg";
 import satisfiedIcon from "../assets/icons/satisfied.svg";
 import neutralIcon from "../assets/icons/neutral.svg";
@@ -929,7 +908,7 @@ const sentimentPlatformDatasets = computed(() => [
   {
     label: "Positive",
     data: dashboardData.platform_sentiment.map((p) => p.positive),
-    backgroundColor: "#4ade80",
+    backgroundColor: "#1e40af",
     borderRadius: 2,
   },
   {
