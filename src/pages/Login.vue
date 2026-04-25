@@ -50,6 +50,8 @@ async function handleLogin() {
   try {
     const { data } = await api.post("/login", form.value);
     localStorage.setItem("token", data.token);
+    const username = data.user?.name ?? data.user?.username ?? data.name ?? data.username ?? "";
+    localStorage.setItem("username", username);
     router.push("/dashboard");
   } catch (e) {
     error.value = e.response?.data?.message || "Login failed.";

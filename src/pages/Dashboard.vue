@@ -654,7 +654,18 @@ import BarChart from "../components/BarChart.vue";
 import GeoMap from "../components/GeoMap.vue";
 import PlatformIcon from "../components/PlatformIcon.vue";
 import WordCloud from "../components/WordCloud.vue";
-import logo from "../assets/logo.svg";
+import defaultLogo from "../assets/logo.svg";
+
+const userLogos = import.meta.glob("../assets/usres/*.{jpg,jpeg,png,svg}", { eager: true });
+const _authName = localStorage.getItem("username") || "";
+const _extensions = ["svg", "png", "jpg", "jpeg"];
+const logo = (() => {
+  for (const ext of _extensions) {
+    const key = `../assets/usres/${_authName}.${ext}`;
+    if (userLogos[key]) return userLogos[key].default ?? userLogos[key];
+  }
+  return defaultLogo;
+})();
 import satisfiedIcon from "../assets/icons/satisfied.svg";
 import neutralIcon from "../assets/icons/neutral.svg";
 import unsatisfiedIcon from "../assets/icons/unsatisfied.svg";
