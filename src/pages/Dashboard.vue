@@ -307,7 +307,7 @@
                 {{ p.platform }}
               </span>
             </div>
-            <LineChart :table="dashboardData.table" />
+            <LineChart :trend-data="dashboardData.trend" :table="dashboardData.table" />
           </div>
           <div class="bg-white rounded-xl shadow p-4 lg:col-span-2 flex flex-col">
             <p

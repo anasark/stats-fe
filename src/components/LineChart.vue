@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <!-- Filter dropdown -->
-    <div class="absolute top-0 right-0 z-10">
+    <div v-if="platforms.length" class="absolute top-0 right-0 z-10">
       <p class="text-[10px] text-slate-400 mb-1 text-right">*Select filter below</p>
       <div class="relative">
         <button
@@ -80,39 +80,71 @@ Chart.register(
 );
 
 const props = defineProps({
+  trendData: { type: Array, default: () => [] },
   table: { type: Array, default: () => [] },
 });
 
 const COLORS = ['#1a3a6b', '#7ab3e0', '#e05c5c', '#f0a500', '#5cb85c', '#9b59b6', '#17a2b8', '#6c757d'];
+const monthNames = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 const canvas = ref(null);
 const dropdownOpen = ref(false);
 const avgLabelTop = ref(100);
 let chart = null;
 
-// Computed: unique sorted dates
-const dates = computed(() => {
-  const dateSet = new Set();
-  props.table.forEach((row) => {
-    if (row.date) dateSet.add(row.date);
+const hasPlatformsInTrendData = computed(() => {
+  return (props.trendData || []).some((row) => row.platform || row.source);
+});
+
+const sourceRows = computed(() => {
+  if (Array.isArray(props.trendData) && props.trendData.length > 0 && hasPlatformsInTrendData.value) {
+    return props.trendData;
+  }
+  if (Array.isArray(props.table) && props.table.length > 0) return props.table;
+  if (Array.isArray(props.trendData) && props.trendData.length > 0) return props.trendData;
+  return [];
+});
+
+const rawMonthlyRows = computed(() => {
+  if (Array.isArray(props.trendData) && props.trendData.length > 0) return props.trendData;
+  if (Array.isArray(props.table) && props.table.length > 0) return props.table;
+  return [];
+});
+
+const aggregatedByMonth = computed(() => {
+  const monthly = Array(12).fill(0);
+  rawMonthlyRows.value.forEach(item => {
+    const date = new Date(item.date);
+    if (Number.isNaN(date.getTime())) return;
+    const monthIndex = date.getMonth();
+    const total = Number(item.total ?? 1);
+    monthly[monthIndex] += Number.isFinite(total) ? total : 0;
   });
-  return Array.from(dateSet).sort((a, b) => new Date(a) - new Date(b));
+  return monthly;
 });
 
 // Computed: unique platforms
 const platforms = computed(() => {
   const platformSet = new Set();
-  props.table.forEach((row) => {
-    if (row.platform) platformSet.add(row.platform);
+  sourceRows.value.forEach((row) => {
+    const name = row.platform || row.source;
+    if (name) platformSet.add(name);
   });
   return Array.from(platformSet).sort();
 });
 
 // Platform colors mapping
 const platformColors = computed(() => {
+  const fixedColors = {
+    Instagram: '#1a3a6b',
+    'Online News': '#7ab3e0',
+  };
   const colors = {};
   platforms.value.forEach((p, i) => {
-    colors[p] = COLORS[i % COLORS.length];
+    colors[p] = fixedColors[p] || COLORS[i % COLORS.length];
   });
   return colors;
 });
@@ -123,22 +155,76 @@ const visiblePlatforms = reactive(new Set());
 const selectedCount = computed(() => visiblePlatforms.size);
 
 // Whether we have data to display
-const hasData = computed(() => props.table.length > 0 && dates.value.length > 0);
+const hasData = computed(() => sourceRows.value.length > 0);
 
-// Average mention (total records / number of unique dates)
+const platformMonthlyTotals = computed(() => {
+  const monthlyByPlatform = {};
+
+  platforms.value.forEach((platform) => {
+    monthlyByPlatform[platform] = Array(12).fill(0);
+  });
+
+  sourceRows.value.forEach((row) => {
+    const date = new Date(row.date);
+    if (Number.isNaN(date.getTime())) return;
+    const monthIndex = date.getMonth();
+    const platform = row.platform || row.source;
+    if (!platform || !monthlyByPlatform[platform]) return;
+
+    const total = Number(row.total ?? 1);
+    monthlyByPlatform[platform][monthIndex] += Number.isFinite(total) ? total : 0;
+  });
+
+  return monthlyByPlatform;
+});
+
+const selectedMonthlyTotals = computed(() => {
+  if (platforms.value.length === 0) {
+    return aggregatedByMonth.value;
+  }
+
+  const monthly = Array(12).fill(0);
+
+  platforms.value.forEach((platform) => {
+    if (!visiblePlatforms.has(platform)) return;
+    const values = platformMonthlyTotals.value[platform] || [];
+    for (let i = 0; i < 12; i += 1) {
+      monthly[i] += values[i] || 0;
+    }
+  });
+
+  return monthly;
+});
+
+// Average mention across 12 monthly values
 const avgMention = computed(() => {
-  if (!hasData.value || dates.value.length === 0) return null;
-  return Math.round(props.table.length / dates.value.length);
+  if (!hasData.value) return null;
+  const total = selectedMonthlyTotals.value.reduce((sum, val) => sum + val, 0);
+  return Math.round(total / 12);
 });
 
 // Build datasets: one line per platform
 const chartDatasets = computed(() => {
   const datasets = [];
 
-  platforms.value.forEach((platform) => {
-    const data = dates.value.map((date) => {
-      return props.table.filter((row) => row.platform === platform && row.date === date).length;
+  if (platforms.value.length === 0) {
+    datasets.push({
+      label: 'Total Mention',
+      data: aggregatedByMonth.value,
+      borderColor: '#1a3a6b',
+      backgroundColor: '#1a3a6b',
+      tension: 0.3,
+      pointRadius: 4,
+      pointBackgroundColor: '#1a3a6b',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 1,
+      fill: false,
+      hidden: false,
     });
+  }
+
+  platforms.value.forEach((platform) => {
+    const data = platformMonthlyTotals.value[platform] || Array(12).fill(0);
 
     datasets.push({
       label: platform,
@@ -151,15 +237,15 @@ const chartDatasets = computed(() => {
       pointBorderColor: '#fff',
       pointBorderWidth: 1,
       fill: false,
-      hidden: visiblePlatforms.size > 0 && !visiblePlatforms.has(platform),
+      hidden: !visiblePlatforms.has(platform),
     });
   });
 
   // Add average line as dashed dataset
-  if (avgMention.value !== null && dates.value.length > 0) {
+  if (avgMention.value !== null) {
     datasets.push({
       label: 'Average',
-      data: Array(dates.value.length).fill(avgMention.value),
+      data: Array(12).fill(avgMention.value),
       borderColor: '#9ca3af',
       borderDash: [6, 4],
       borderWidth: 1,
@@ -185,7 +271,7 @@ function updateChartVisibility() {
   if (!chart) return;
   
   platforms.value.forEach((platform, index) => {
-    const shouldHide = visiblePlatforms.size > 0 && !visiblePlatforms.has(platform);
+    const shouldHide = !visiblePlatforms.has(platform);
     chart.setDatasetVisibility(index, !shouldHide);
   });
   
@@ -202,13 +288,6 @@ function updateAvgLabelPosition() {
   }
 }
 
-function formatDateLabel(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
 function init() {
   if (!canvas.value || !hasData.value) return;
   
@@ -217,7 +296,7 @@ function init() {
   chart = new Chart(canvas.value, {
     type: "line",
     data: {
-      labels: dates.value.map(formatDateLabel),
+      labels: monthNames,
       datasets: chartDatasets.value,
     },
     options: {
@@ -310,7 +389,7 @@ onMounted(() => {
 });
 
 watch(
-  () => props.table,
+  () => [props.table, props.trendData],
   () => {
     visiblePlatforms.clear();
     platforms.value.forEach((p) => visiblePlatforms.add(p));
