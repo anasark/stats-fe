@@ -297,16 +297,6 @@
             >
               Trend
             </p>
-            <div v-if="dashboardData.mention_by_platform.length" class="flex flex-wrap gap-3 mb-3">
-              <span
-                v-for="p in dashboardData.mention_by_platform"
-                :key="p.platform"
-                class="flex items-center gap-1.5 text-[11px] text-slate-600 capitalize"
-              >
-                <PlatformIcon :platform="p.platform" :size="14" />
-                {{ p.platform }}
-              </span>
-            </div>
             <LineChart :trend-data="dashboardData.trend" :table="dashboardData.table" />
           </div>
           <div class="bg-white rounded-xl shadow p-4 lg:col-span-2 flex flex-col">

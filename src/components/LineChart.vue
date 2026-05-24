@@ -41,15 +41,30 @@
     </div>
 
     <!-- Chart container -->
-    <div v-else class="relative" style="height: 400px;">
-      <canvas ref="canvas"></canvas>
-      <!-- Average label -->
-      <div
-        v-if="avgMention !== null"
-        class="absolute right-2 text-[11px] text-indigo-400 bg-indigo-50 px-2 py-0.5 rounded"
-        :style="{ top: avgLabelTop + 'px' }"
-      >
-        avg mention: {{ avgMention }}
+    <div v-else>
+      <!-- Custom legend -->
+      <div class="flex flex-wrap justify-center gap-4 mb-2">
+        <span
+          v-for="item in customLegendItems"
+          :key="item.label"
+          class="flex items-center gap-1.5 text-[11px] text-slate-600 capitalize"
+        >
+          <PlatformIcon :platform="item.label" :size="13" />
+          <span class="w-2.5 h-2.5 rounded-full inline-block" :style="{ backgroundColor: item.color }"></span>
+          {{ item.label }}
+        </span>
+      </div>
+
+      <div class="relative" style="height: 400px;">
+        <canvas ref="canvas"></canvas>
+        <!-- Average label -->
+        <div
+          v-if="avgMention !== null"
+          class="absolute right-2 text-[11px] text-indigo-400 bg-indigo-50 px-2 py-0.5 rounded"
+          :style="{ top: avgLabelTop + 'px' }"
+        >
+          avg mention: {{ avgMention }}
+        </div>
       </div>
     </div>
   </div>
@@ -260,6 +275,13 @@ const chartDatasets = computed(() => {
   return datasets;
 });
 
+// Custom legend items: platforms only (no Average)
+const customLegendItems = computed(() =>
+  chartDatasets.value
+    .filter((ds) => ds.label !== 'Average')
+    .map((ds) => ({ label: ds.label, color: ds.borderColor })),
+);
+
 function togglePlatform(platform) {
   if (visiblePlatforms.has(platform)) {
     visiblePlatforms.delete(platform);
@@ -310,19 +332,7 @@ function init() {
       },
       plugins: {
         datalabels: { display: false },
-        legend: {
-          position: "top",
-          align: "center",
-          labels: {
-            usePointStyle: true,
-            pointStyle: 'circle',
-            boxWidth: 8,
-            boxHeight: 8,
-            padding: 20,
-            font: { size: 11 },
-            filter: (item) => item.text !== 'Average',
-          },
-        },
+        legend: { display: false },
         tooltip: {
           backgroundColor: 'rgba(255,255,255,0.95)',
           titleColor: '#334155',
