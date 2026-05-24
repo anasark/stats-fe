@@ -315,16 +315,6 @@
             >
               Sentiment by Platform
             </p>
-            <div v-if="dashboardData.platform_sentiment.length" class="flex flex-wrap gap-4 mb-3">
-              <span
-                v-for="p in dashboardData.platform_sentiment"
-                :key="p.platform"
-                class="flex items-center gap-1.5 text-[11px] text-slate-600 capitalize"
-              >
-                <PlatformIcon :platform="p.platform" :size="14" />
-                {{ p.platform }}
-              </span>
-            </div>
             <div class="flex-1 min-h-0">
               <BarChart
                 :labels="sentimentPlatformLabels"
