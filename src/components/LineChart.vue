@@ -49,8 +49,8 @@
           :key="item.label"
           class="flex items-center gap-1.5 text-[11px] text-slate-600 capitalize"
         >
-          <PlatformIcon :platform="item.label" :size="13" />
           <span class="w-2.5 h-2.5 rounded-full inline-block" :style="{ backgroundColor: item.color }"></span>
+          <PlatformIcon :platform="item.label" :size="13" />
           {{ item.label }}
         </span>
       </div>

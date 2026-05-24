@@ -293,9 +293,7 @@
 
           <div class="bg-white rounded-xl shadow p-4 lg:col-span-2 flex flex-col">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2"
-            >
-              Trend
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-4"
             </p>
             <LineChart :trend-data="dashboardData.trend" :table="dashboardData.table" />
           </div>
