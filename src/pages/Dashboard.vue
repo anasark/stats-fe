@@ -293,7 +293,7 @@
 
           <div class="bg-white rounded-xl shadow p-4 lg:col-span-2 flex flex-col">
             <p
-              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-4"
+              class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-6"
             >
               Trend
             </p>
