@@ -2,7 +2,7 @@
   <div v-if="!hasData" class="flex items-center justify-center h-40 text-gray-400 text-sm">
     No data available
   </div>
-  <div v-else class="relative" :style="fill ? { height: '100%' } : { height: stacked && horizontal ? (labels.length * 52 + 60) + 'px' : stacked ? '350px' : 'auto' }">
+  <div v-else class="relative" :style="fill ? { height: '100%' } : { height: stacked && horizontal ? (labels.length * 40 + 60) + 'px' : stacked ? '350px' : 'auto' }">
     <canvas ref="canvas"></canvas>
   </div>
 </template>
@@ -154,7 +154,10 @@ function init() {
     plugins: useIconLabels ? [customYLabelPlugin] : [],
     data: {
       labels: props.labels,
-      datasets: isStacked ? percentageDatasets.value : props.datasets,
+      datasets: (isStacked ? percentageDatasets.value : props.datasets).map((ds) => ({
+        ...ds,
+        ...(isHorizontal ? { barThickness: 28 } : {}),
+      })),
     },
     options: {
       responsive: true,
