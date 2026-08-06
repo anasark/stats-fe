@@ -43,14 +43,45 @@
               />
             </div>
           </div>
-          <div>
+          <div class="relative" ref="keywordDropdownRef">
             <p class="text-[10px] text-blue-300 mb-1">Keyword</p>
-            <input
-              type="text"
-              v-model="filters.keyword"
-              placeholder="Search…"
-              class="bg-white/10 border border-white/25 rounded px-2 py-1 text-[11px] text-white w-32 placeholder-blue-300"
-            />
+            <div
+              @click="toggleKeywordDropdown"
+              class="bg-white/10 border border-white/25 rounded px-2 py-1 text-[11px] text-white w-32 cursor-pointer"
+            >
+              <span class="truncate block">{{ keywordDisplayText }}</span>
+            </div>
+
+            <div
+              v-if="isKeywordDropdownOpen"
+              class="absolute top-full left-0 mt-0 bg-white shadow-lg border border-slate-200 z-50 w-full  overflow-y-auto"
+            >
+              <div class="p-1">
+                <label class="flex items-center gap-2 p-1 hover:bg-slate-50 rounded cursor-pointer">
+                  <input
+                    type="checkbox"
+                    :checked="isAllKeywordSelected"
+                    @change="toggleAllKeywords"
+                    class="w-3 h-3 rounded border-slate-300 text-[#1a237e] focus:ring-[#1a237e]"
+                  />
+                  <span class="text-xs text-slate-700 font-medium">All Keyword</span>
+                </label>
+                <div class="border-t border-slate-200 my-1"></div>
+                <label
+                  v-for="keyword in dashboardData.filters.keywords || []"
+                  :key="keyword"
+                  class="flex items-center gap-2 p-1 hover:bg-slate-50 rounded cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="filters.keywords.includes(keyword)"
+                    @change="toggleKeyword(keyword)"
+                    class="w-3 h-3 rounded border-slate-300 text-[#1a237e] focus:ring-[#1a237e]"
+                  />
+                  <span class="text-xs text-slate-600">{{ keyword }}</span>
+                </label>
+              </div>
+            </div>
           </div>
           <div>
             <p class="text-[10px] text-blue-300 mb-1">Platform</p>
@@ -112,7 +143,7 @@
           "
           class="text-xs px-4 py-2 rounded-t-lg transition-all"
         >
-          Overview
+          Page 1
         </button>
         <button
           @click="activeTab = 'detail'"
@@ -123,7 +154,7 @@
           "
           class="text-xs px-4 py-2 rounded-t-lg transition-all"
         >
-          Detail
+          Page 2
         </button>
         <button
           @click="logout"
@@ -156,10 +187,10 @@
           📅 {{ filters.start_date || "…" }} → {{ filters.end_date || "…" }}
         </span>
         <span
-          v-if="filters.keyword"
+          v-if="filters.keywords && filters.keywords.length > 0"
           class="text-xs bg-slate-200 text-slate-600 px-3 py-1 rounded-full"
         >
-          🔤 "{{ filters.keyword }}"
+          🔤 {{ filters.keywords.length === 1 ? filters.keywords[0] : `${filters.keywords.length} keywords` }}
         </span>
         <span
           v-if="filters.platform"
@@ -531,6 +562,9 @@
                     Share
                     <span class="ml-0.5 text-[10px]">{{ sortKey === 'shares' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅' }}</span>
                   </th>
+                  <th class="px-3 py-2 text-slate-500 font-semibold">
+                    Link
+                  </th>                  
                   <th
                     class="px-3 py-2 text-slate-500 font-semibold whitespace-nowrap cursor-pointer select-none hover:text-slate-700"
                     @click="toggleSort('sentiment')"
@@ -569,6 +603,9 @@
                   </td>
                   <td class="px-3 py-2 text-right text-slate-600">
                     {{ (row.shares ?? 0).toLocaleString() }}
+                  </td>
+                  <td class="px-3 py-2 text-slate-700 max-w-xs truncate">
+                    {{ row.url }}
                   </td>
                   <td class="px-3 py-2">
                     <span
@@ -611,6 +648,18 @@
                 </button>
               </div>
             </div>
+            <!-- Download Report Button -->
+            <div class="mt-4 pt-4 border-t border-slate-200">
+              <button
+                @click="exportToExcel"
+                :disabled="isExporting || !dashboardData.table.length"
+                class="flex items-center gap-2 bg-[#1a237e] text-white text-[11px] font-bold px-4 py-2 rounded hover:bg-[#283593] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span v-if="isExporting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span v-else>📥</span>
+                {{ isExporting ? 'Exporting...' : 'Download Report' }}
+              </button>
+            </div>
           </div>
           <p v-else class="text-xs text-slate-400 text-center py-8">
             No results found. Try adjusting filters.
@@ -626,9 +675,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick, watch } from "vue";
+import { ref, reactive, computed, onMounted, nextTick, watch, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "../services/api";
+import * as XLSX from "xlsx";
 import LineChart from "../components/LineChart.vue";
 import BarChart from "../components/BarChart.vue";
 import GeoMap from "../components/GeoMap.vue";
@@ -641,7 +691,8 @@ const _authName = localStorage.getItem("username") || "";
 const _extensions = ["svg", "png", "jpg", "jpeg"];
 const logo = (() => {
   for (const ext of _extensions) {
-    const key = `../assets/usres/${_authName}.${ext}`;
+    // const key = `../assets/usres/${_authName}.${ext}`;
+    const key = `../assets/usres/"CTX".${ext}`;
     if (userLogos[key]) return userLogos[key].default ?? userLogos[key];
   }
   return defaultLogo;
@@ -652,12 +703,17 @@ import unsatisfiedIcon from "../assets/icons/unsatisfied.svg";
 
 const router = useRouter();
 const loading = ref(true);
+const isExporting = ref(false);
 const activeTab = ref("overview");
 const platformCardRef = ref(null);
 const platformCardHeight = ref(null);
 const netSentimentCardRef = ref(null);
 const sentimentPctCardRef = ref(null);
 const overviewRowHeight = ref(null);
+
+// Keyword dropdown state
+const keywordDropdownRef = ref(null);
+const isKeywordDropdownOpen = ref(false);
 
 const dashboardData = reactive({
   filters: { platforms: [], regions: [], applied: {} },
@@ -678,7 +734,7 @@ const dashboardData = reactive({
 const filters = reactive({
   start_date: "",
   end_date: "",
-  keyword: "",
+  keywords: [], // Changed from keyword string to keywords array
   platform: "",
   region: "",
   page: 1,
@@ -731,20 +787,38 @@ const hasActiveFilters = computed(
   () =>
     filters.start_date ||
     filters.end_date ||
-    filters.keyword ||
+    (filters.keywords && filters.keywords.length > 0) ||
     filters.platform ||
     filters.region,
 );
+
+// Keyword dropdown computed properties
+const isAllKeywordSelected = computed(() => filters.keywords.length === 0);
+
+const keywordDisplayText = computed(() => {
+  if (isAllKeywordSelected.value) return 'All Keyword';
+  if (filters.keywords.length === 1) return filters.keywords[0];
+  if (filters.keywords.length > 1) return `${filters.keywords.length} selected`;
+  return 'Select...';
+});
 
 async function loadDashboard() {
   try {
     loading.value = true;
     const params = Object.fromEntries(
-      Object.entries(filters).filter(([, v]) => v !== "" && v !== null && v !== undefined),
+      Object.entries(filters).filter(([, v]) => {
+        if (Array.isArray(v)) return v.length > 0;
+        return v !== "" && v !== null && v !== undefined;
+      }),
     );
+    // Convert keywords array to comma-separated string for API
+    if (params.keywords && Array.isArray(params.keywords)) {
+      params.keyword = params.keywords.join(',');
+      delete params.keywords;
+    }
     const res = await api.get("/dashboard", { params });
     const d = res.data;
-    dashboardData.filters              = d.filters             ?? { platforms: [], regions: [], applied: {} };
+    dashboardData.filters              = d.filters             ?? { platforms: [], regions: [], keywords: [] };
     dashboardData.net_sentiment        = d.net_sentiment        ?? 0;
     dashboardData.sentiment_percentage = d.sentiment_percentage ?? { positive: 0, neutral: 0, negative: 0 };
     dashboardData.trend                = Array.isArray(d.trend)                ? d.trend                : [];
@@ -773,7 +847,7 @@ function applyFilters() {
 function resetFilters() {
   filters.start_date = "";
   filters.end_date   = "";
-  filters.keyword    = "";
+  filters.keywords   = [];
   filters.platform   = "";
   filters.region     = "";
   filters.page       = 1;
@@ -785,6 +859,102 @@ async function logout() {
   localStorage.removeItem("token");
   router.push("/login");
 }
+
+async function exportToExcel() {
+  try {
+    isExporting.value = true;
+    
+    // Wait a moment for UI to update
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Prepare data with professional formatting
+    const exportData = dashboardData.table.map(row => ({
+      'Date': row.date || '',
+      'Platform': row.platform || '',
+      'Region': row.region || '',
+      'Content': row.text || '',
+      'Likes': row.likes || 0,
+      'Comments': row.comments || 0,
+      'Shares': row.shares || 0,
+      'URL': row.url || '',
+      'Sentiment': row.sentiment || ''
+    }));
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    
+    // Set column widths for better readability
+    ws['!cols'] = [
+      { wch: 15 }, // Date
+      { wch: 15 }, // Platform
+      { wch: 15 }, // Region
+      { wch: 50 }, // Content
+      { wch: 10 }, // Likes
+      { wch: 10 }, // Comments
+      { wch: 10 }, // Shares
+      { wch: 40 }, // URL
+      { wch: 12 }  // Sentiment
+    ];
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Social Media Data');
+    
+    // Generate dynamic filename with current date
+    const currentDate = new Date().toISOString().split('T')[0];
+    const filename = `Report_Data_social_monitoring_${currentDate}.xlsx`;
+    
+    // Download file
+    XLSX.writeFile(wb, filename);
+    
+  } catch (error) {
+    console.error('Export failed:', error);
+    alert('Failed to export data. Please try again.');
+  } finally {
+    isExporting.value = false;
+  }
+}
+
+// Keyword dropdown functions
+function toggleKeywordDropdown() {
+  isKeywordDropdownOpen.value = !isKeywordDropdownOpen.value;
+}
+
+function toggleAllKeywords() {
+  if (isAllKeywordSelected.value) {
+    // "All Keyword" is checked, unchecking it - leave empty so user can select individual keywords
+    filters.keywords = [];
+  } else {
+    // "All Keyword" is unchecked, checking it - clear selection to show all
+    filters.keywords = [];
+  }
+}
+
+function toggleKeyword(keyword) {
+  if (filters.keywords.includes(keyword)) {
+    filters.keywords = filters.keywords.filter(k => k !== keyword);
+    if (filters.keywords.length === 0) {
+      filters.keywords = [];
+    }
+  } else {
+    filters.keywords = [...filters.keywords, keyword];
+  }
+}
+
+// Close keyword dropdown when clicking outside
+function handleKeywordClickOutside(event) {
+  if (keywordDropdownRef.value && !keywordDropdownRef.value.contains(event.target)) {
+    isKeywordDropdownOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleKeywordClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleKeywordClickOutside);
+});
 
 function platformIcon(p) {
   const map = {
