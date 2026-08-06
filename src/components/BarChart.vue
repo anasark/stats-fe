@@ -85,12 +85,12 @@ const customYLabelPlugin = {
     const yScale = scales.y;
     if (!yScale) return;
 
-    const iconSize = 14;
+    const iconSize = 20;
     const gap = 4;
     const rightPad = 8;
 
     ctx.save();
-    ctx.font = '10px sans-serif';
+    ctx.font = '14px sans-serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -156,7 +156,7 @@ function init() {
       labels: props.labels,
       datasets: (isStacked ? percentageDatasets.value : props.datasets).map((ds) => ({
         ...ds,
-        ...(isHorizontal ? { barThickness: 28 } : {}),
+        ...(isHorizontal ? { barThickness: 48 } : {}),
       })),
     },
     options: {
@@ -174,7 +174,7 @@ function init() {
             boxWidth: 12,
             boxHeight: 12,
             padding: 20,
-            font: { size: 11 },
+            font: { size: 14 },
           },
         },
         tooltip: {
@@ -189,7 +189,7 @@ function init() {
         datalabels: isStacked
           ? {
               color: "#ffffff",
-              font: { size: 13, weight: "bold" },
+              font: { size: 18, weight: "bold" },
               anchor: "center",
               align: "center",
               formatter: (value) => (value >= 5 ? `${value}%` : ""),
