@@ -328,7 +328,7 @@
             >
               Trend
             </p>
-            <LineChart :trend-data="dashboardData.trend" :table="dashboardData.table" />
+            <LineChart :trend-data="dashboardData.trend_by_platform" />
           </div>
           <div class="bg-white rounded-xl shadow p-4 lg:col-span-2 flex flex-col">
             <p
@@ -462,7 +462,13 @@
             >
               # Mention by Province
             </p>
-            <div v-if="dashboardData.mention_by_province.length">
+            <!-- Same 16/9 box GeoMap sizes itself to, so the two cards line up
+                 whatever the column width. The chart keeps its full height from
+                 the row count and scrolls inside. -->
+            <div
+              v-if="dashboardData.mention_by_province.length"
+              class="aspect-[16/9] overflow-y-auto"
+            >
               <BarChart
                 :labels="provinceLabels"
                 :datasets="provinceDatasets"
@@ -500,7 +506,7 @@
                 <span class="text-[11px] text-slate-400">Rows per page:</span>
                 <select
                   v-model.number="filters.per_page"
-                  @change="filters.page = 1"
+                  @change="changePerPage"
                   class="text-[11px] border border-slate-200 rounded px-1.5 py-0.5 text-slate-600 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
                 >
                   <option :value="10">10</option>
@@ -576,7 +582,7 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="(row, i) in pagedTable"
+                  v-for="(row, i) in dashboardData.table"
                   :key="row.id ?? i"
                   class="border-b border-slate-100 hover:bg-slate-50"
                 >
@@ -633,15 +639,15 @@
               </span>
               <div class="flex gap-2">
                 <button
-                  @click="filters.page--"
-                  :disabled="tableMeta.page <= 1"
+                  @click="goToPage(tableMeta.page - 1)"
+                  :disabled="loading || tableMeta.page <= 1"
                   class="text-[11px] px-3 py-1 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   ← Prev
                 </button>
                 <button
-                  @click="filters.page++"
-                  :disabled="tableMeta.page >= tableMeta.pages"
+                  @click="goToPage(tableMeta.page + 1)"
+                  :disabled="loading || tableMeta.page >= tableMeta.pages"
                   class="text-[11px] px-3 py-1 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
                   Next →
@@ -720,6 +726,9 @@ const dashboardData = reactive({
   net_sentiment: 0,
   sentiment_percentage: { positive: 0, neutral: 0, negative: 0 },
   trend: [],
+  // Per-platform mention counts for the trend chart. Used to be derived from
+  // `table` in LineChart, which broke once the table became paginated.
+  trend_by_platform: [],
   platform_sentiment: [],
   mention_by_platform: [],
   mention_by_province: [],
@@ -729,6 +738,7 @@ const dashboardData = reactive({
   negative_words: [],
   positive_words: [],
   table: [],
+  meta: { total: 0, page: 1, per_page: 20, pages: 1 },
 });
 
 const filters = reactive({
@@ -753,35 +763,24 @@ function toggleSort(key) {
     sortDir.value = 'asc';
   }
   filters.page = 1;
+  loadDashboard();
 }
 
-const sortedTable = computed(() => {
-  if (!sortKey.value) return dashboardData.table;
-  return [...dashboardData.table].sort((a, b) => {
-    let va = a[sortKey.value] ?? '';
-    let vb = b[sortKey.value] ?? '';
-    if (typeof va === 'number' && typeof vb === 'number') {
-      return sortDir.value === 'asc' ? va - vb : vb - va;
-    }
-    va = String(va).toLowerCase();
-    vb = String(vb).toLowerCase();
-    if (va < vb) return sortDir.value === 'asc' ? -1 : 1;
-    if (va > vb) return sortDir.value === 'asc' ? 1 : -1;
-    return 0;
-  });
-});
+// The API returns one page at a time plus a `meta` block, so paging and
+// sorting are no longer something the client can do on its own — both are
+// query params that trigger a reload.
+const tableMeta = computed(() => dashboardData.meta);
 
-// Client-side pagination over the full table returned by the API
-const pagedTable = computed(() => {
-  const start = (filters.page - 1) * filters.per_page;
-  return sortedTable.value.slice(start, start + filters.per_page);
-});
+function goToPage(page) {
+  if (page < 1 || page > dashboardData.meta.pages || page === filters.page) return;
+  filters.page = page;
+  loadDashboard();
+}
 
-const tableMeta = computed(() => {
-  const total = sortedTable.value.length;
-  const pages = Math.max(1, Math.ceil(total / filters.per_page));
-  return { total, page: filters.page, per_page: filters.per_page, pages };
-});
+function changePerPage() {
+  filters.page = 1;
+  loadDashboard();
+}
 
 const hasActiveFilters = computed(
   () =>
@@ -816,12 +815,17 @@ async function loadDashboard() {
       params.keyword = params.keywords.join(',');
       delete params.keywords;
     }
+    if (sortKey.value) {
+      params.sort_by = sortKey.value;
+      params.sort_dir = sortDir.value;
+    }
     const res = await api.get("/dashboard", { params });
     const d = res.data;
     dashboardData.filters              = d.filters             ?? { platforms: [], regions: [], keywords: [] };
     dashboardData.net_sentiment        = d.net_sentiment        ?? 0;
     dashboardData.sentiment_percentage = d.sentiment_percentage ?? { positive: 0, neutral: 0, negative: 0 };
     dashboardData.trend                = Array.isArray(d.trend)                ? d.trend                : [];
+    dashboardData.trend_by_platform    = Array.isArray(d.trend_by_platform)    ? d.trend_by_platform    : [];
     dashboardData.platform_sentiment   = Array.isArray(d.platform_sentiment)   ? d.platform_sentiment   : [];
     dashboardData.mention_by_platform  = Array.isArray(d.mention_by_platform)  ? d.mention_by_platform  : [];
     dashboardData.mention_by_province  = Array.isArray(d.mention_by_province)  ? d.mention_by_province  : [];
@@ -831,7 +835,15 @@ async function loadDashboard() {
     dashboardData.negative_words       = Array.isArray(d.negative_words)       ? d.negative_words       : [];
     dashboardData.positive_words       = Array.isArray(d.positive_words)       ? d.positive_words       : [];
     dashboardData.table                = Array.isArray(d.table)                ? d.table                : [];
-    filters.page                       = 1;
+    // Trust the server's paging state; falling back to the row count keeps the
+    // controls sane if an older backend answers without a `meta` block.
+    dashboardData.meta                 = d.meta ?? {
+      total: dashboardData.table.length,
+      page: 1,
+      per_page: filters.per_page,
+      pages: 1,
+    };
+    filters.page                       = dashboardData.meta.page;
   } catch (e) {
     console.error(e);
   } finally {
@@ -863,12 +875,25 @@ async function logout() {
 async function exportToExcel() {
   try {
     isExporting.value = true;
-    
-    // Wait a moment for UI to update
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+
+    // `dashboardData.table` only holds the page on screen, so the report is
+    // built from a dedicated unpaginated endpoint rather than what is rendered.
+    const params = Object.fromEntries(
+      Object.entries(filters).filter(([key, v]) => {
+        if (["page", "per_page"].includes(key)) return false;
+        if (Array.isArray(v)) return v.length > 0;
+        return v !== "" && v !== null && v !== undefined;
+      }),
+    );
+    if (params.keywords && Array.isArray(params.keywords)) {
+      params.keyword = params.keywords.join(',');
+      delete params.keywords;
+    }
+    const exportRes = await api.get("/dashboard/export", { params });
+    const allRows = Array.isArray(exportRes.data?.table) ? exportRes.data.table : [];
+
     // Prepare data with professional formatting
-    const exportData = dashboardData.table.map(row => ({
+    const exportData = allRows.map(row => ({
       'Date': row.date || '',
       'Platform': row.platform || '',
       'Region': row.region || '',

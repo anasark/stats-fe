@@ -2,7 +2,10 @@
   <div v-if="!hasData" class="flex items-center justify-center h-40 text-gray-400 text-sm">
     No data available
   </div>
-  <div v-else class="relative" :style="fill ? { height: '100%' } : { height: stacked && horizontal ? (labels.length * 40 + 60) + 'px' : stacked ? '350px' : 'auto' }">
+  <!-- Horizontal charts grow with their row count. Left on 'auto' they keep a
+       fixed aspect ratio, so a long category list (40 provinces) collapses into
+       one solid block of touching bars. -->
+  <div v-else class="relative" :style="fill ? { height: '100%' } : { height: horizontal ? (labels.length * rowHeight + 60) + 'px' : stacked ? '350px' : 'auto' }">
     <canvas ref="canvas"></canvas>
   </div>
 </template>
@@ -37,6 +40,10 @@ const props = defineProps({
   stacked: { type: Boolean, default: false },
   fill: { type: Boolean, default: false },
 });
+
+// Vertical space each horizontal row gets. Stacked charts carry a percentage
+// label inside the bar, so they need more room than a plain count bar.
+const rowHeight = computed(() => (props.stacked ? 40 : 28));
 
 // Platform icon map (mirrors PlatformIcon.vue)
 const PLATFORM_ICON_MAP = {
@@ -156,12 +163,22 @@ function init() {
       labels: props.labels,
       datasets: (isStacked ? percentageDatasets.value : props.datasets).map((ds) => ({
         ...ds,
-        ...(isHorizontal ? { barThickness: 48 } : {}),
+        // maxBarThickness, not barThickness: a fixed thickness overrides
+        // Chart.js's percentage sizing, so bars keep their 48px even when the
+        // category slot is thinner than that and end up touching. As a cap it
+        // still holds the look on short lists like the four platforms.
+        ...(isHorizontal
+          ? { maxBarThickness: 48, categoryPercentage: 0.8, barPercentage: 0.85 }
+          : {}),
       })),
     },
     options: {
       responsive: true,
-      maintainAspectRatio: !isStacked && !props.fill,
+      // Only keep the aspect ratio when the wrapper height is 'auto'. Horizontal
+      // charts get an explicit pixel height from their row count, and leaving
+      // this on would draw the canvas at its ratio height and leave the rest of
+      // the container blank.
+      maintainAspectRatio: !isStacked && !props.fill && !isHorizontal,
       indexAxis: isHorizontal ? "y" : "x",
       plugins: {
         legend: {
